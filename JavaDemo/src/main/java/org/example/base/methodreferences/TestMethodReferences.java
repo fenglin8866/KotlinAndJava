@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 public class TestMethodReferences {
 
-    public void test0() {
+    public static void test0() {
         Person person=new Person("xxh");
         List<String> list=List.of("a", "b");
         //静态方法
