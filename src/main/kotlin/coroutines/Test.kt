@@ -1,5 +1,5 @@
 package coroutines
 
 fun main(){
-    CoroutineTest.test7()
+    CoroutineTest2.test2()
 }

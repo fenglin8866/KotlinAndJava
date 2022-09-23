@@ -144,7 +144,10 @@ object CoroutineTest {
 
     }
 
-    fun test6()= runBlocking {
+    /**
+     * coroutineScope子协程中运行
+     */
+    fun test6() = runBlocking {
         launch {
             delay(1000)
             intervalTime("test6 launch1", startTime)
@@ -159,12 +162,17 @@ object CoroutineTest {
         }
     }
 
-    fun test7()= runBlocking {
+    /**
+     * 对比async中使用方法参数与coroutineScope的区别
+     * 1.阻塞效果是相同的
+     * 2.只有并发，效果不一致，coroutineScope会阻塞
+     */
+    fun test7() = runBlocking {
         launch {
             delay(1000)
             intervalTime("test7 launch1", startTime)
         }
-        //concurrentSum()
+//        concurrentSum()
         testAsync(this)
         launch {
             delay(1000)
@@ -172,19 +180,52 @@ object CoroutineTest {
         }
     }
 
+    /**
+     * 调度器
+     */
+    fun test8() = runBlocking {
+        val job1 = launch {
+            delay(2000)
+//            delay(400)
+            log(msg = "main")
+        }
+        val job2 = launch(Dispatchers.Default) {
+            log(msg = "Default")
+            delay(1000)
+            log(msg = "Default")
+        }
+        withContext(Dispatchers.Unconfined) {
+            log(msg = "withContext0")
+            job2.join()
+            log(msg = "withContext1")
+            job1.join()
+            // delay(1000)
+            log(msg = "withContext2")
+        }
+    }
+
+    /*
+    [xxh][DefaultDispatcher-worker-1 @coroutine#3]:Default
+    [xxh][main @coroutine#1]:withContext0
+    [xxh][DefaultDispatcher-worker-1 @coroutine#3]:Default
+    [xxh][DefaultDispatcher-worker-1 @coroutine#1]:withContext1
+    [xxh][main @coroutine#2]:main
+    [xxh][main @coroutine#1]:withContext2
+     */
+
     private suspend fun concurrentSum() = coroutineScope {
         val one = async<Int> {
             try {
-                delay(3000) // 模拟一个长时间的运算
+                delay(1000) // 模拟一个长时间的运算
                 42
             } finally {
             }
         }
         val two = async<Int> {
-           delay(2000)
+            delay(1000)
             48
         }
-        val sum=one.await() + two.await()
+        val sum = one.await() + two.await()
         intervalTime("concurrentSum = $sum", startTime)
     }
 
